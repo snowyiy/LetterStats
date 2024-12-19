@@ -1,0 +1,9 @@
+fonctionalités:
+    - trouver la fréquence des lettres dans:
+        - dans un fichier txt
+        - dans un texte directement inserer
+        *- une page html (avec un lien) -> <p></p>
+    - detecter la langue en fonction de la fréquences de certaines lettre dans un texte
+    - afficher ces informations avec un graphique
+
+
