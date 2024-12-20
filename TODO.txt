@@ -1,0 +1,7 @@
+add settings
+add info menu
+add build script
+add auto update system (single button/request github)
+
+
+finish the app
