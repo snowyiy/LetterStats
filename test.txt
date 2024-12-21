@@ -1,0 +1,1 @@
+Coucou ceci est un texte écrit en français comme in peut le voir aux accents et aux ç qui sont des lettres typiques de la langue française. Le plus il y a de lettre et le plus l'algorithme est juste, donc il faut écrire beaucoup pour que ça marche !
