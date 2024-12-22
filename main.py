@@ -10,6 +10,10 @@ import json
 import os
 
 
+from database_handler import DatabaseHandler
+databasehandler = DatabaseHandler("data.db")
+
+
 class LetterStats:
     def __init__(self):
         self.root = ctk.CTk()
@@ -17,6 +21,8 @@ class LetterStats:
         self.dark_theme = True
         self.default_dark_theme = ctk.StringVar()
         self.settings_file = "settings.json"
+        self.database_file = "language.json"
+        self.update = True
         self.version = None   # get from config
         self.repo_url = None   # get from config
         self.dictionnary = {"a" : 0.0, "z" : 0.0, "e" : 0.0, "r" : 0.0, "t" : 0.0, "y" : 0.0, "u" : 0.0, "i" : 0.0, "o" : 0.0, "p" : 0.0, "q" : 0.0, "s" : 0.0, "d" : 0.0, "f" : 0.0, "g" : 0.0, "h" : 0.0,
@@ -37,6 +43,19 @@ class LetterStats:
         self.img_settings = ctk.CTkImage(Image.open("./assets/setting.png"))
 
 
+    def updateJsonDatabase(self, lang):
+        with open(self.database_file, "r+") as data_file:
+            for letter in self.dictionnary.keys():
+                # Read
+                freq = json.load(data_file)[lang][letter]["freq"]
+                freq_num = json.load(data_file)[lang][letter]["freq_num"]
+                new_freq = (float(self.dictionnary[letter]) + float(freq)) / freq_num + 1 
+                # Write
+                
+            config_file.close()
+
+
+
     def drawGraph(self) -> None:
         x = np.arange(len(self.dictionnary))
 
@@ -52,8 +71,14 @@ class LetterStats:
             if (letter in self.dictionnary.keys()):
                 self.dictionnary[letter] += 1.0
 
+
         for letter in self.dictionnary:
             self.dictionnary[letter] /= len(text)
+        
+        if (self.update):
+            dialog = ctk.CTkInputDialog(text="Type in the language :", title="Language")
+            lang = dialog.get_input()
+            self.updateJsonDatabase(lang)
 
         
     def checkLettersCount(self, text) -> bool:
