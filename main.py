@@ -10,20 +10,20 @@ import json
 import os
 
 
-from database_handler import DatabaseHandler
-databasehandler = DatabaseHandler("data.db")
-
 
 class LetterStats:
     def __init__(self):
         self.root = ctk.CTk()
         self.letter_freq = []
-        self.dark_theme = True
+        self.dark_theme = None   # get from settings file
         self.config_file = "config.json"
+        self.settings_file = "settings.json"
         self.database_file = "language.json"
-        self.update = True
-        self.version = None   # get from config
-        self.repo_url = None   # get from config
+        self.update_db = None   # get from settings file
+        self.app_name = None   # get from config file
+        self.version = None   # get from config file
+        self.repo_url = None   # get from config file
+        self.author = None   # get from config file
         self.dictionnary = {"a" : 0.0, "z" : 0.0, "e" : 0.0, "r" : 0.0, "t" : 0.0, "y" : 0.0, "u" : 0.0, "i" : 0.0, "o" : 0.0, "p" : 0.0, "q" : 0.0, "s" : 0.0, "d" : 0.0, "f" : 0.0, "g" : 0.0, "h" : 0.0,
                             "j" : 0.0, "k" : 0.0, "l" : 0.0, "m" : 0.0, "w" : 0.0, "x" : 0.0, "c" : 0.0, "v" : 0.0, "b" : 0.0, "n" : 0.0, "é" : 0.0, "ç" : 0.0, "è" : 0.0, "à" : 0.0, "ù" : 0.0, "ê" : 0.0}
 
@@ -74,7 +74,7 @@ class LetterStats:
         for letter in self.dictionnary:
             self.dictionnary[letter] /= len(text)
         
-        if (self.update):
+        if (self.update_db):
             dialog = ctk.CTkInputDialog(text="Type in the language :", title="Language")
             lang = dialog.get_input()
             self.updateJsonDatabase(lang)
@@ -122,7 +122,7 @@ class LetterStats:
         top_infos.geometry("360x240")
 
         label_name = ctk.CTkLabel(top_infos,
-                                  text=f"LetterStats v{self.version}\nMade By N&ko",
+                                  text=f"{self.app_name} v{self.version}\nMade By {self.author}",
                                   font=('Monospace', 16)
         ).pack(anchor=ctk.CENTER, pady=10)
 
@@ -144,21 +144,33 @@ class LetterStats:
         top_settings.geometry("240x144")
         
 
+        btnswitch_update_db = ctk.CTkSwitch(top_settings,
+                                                text="Update Lang database",
+                                                command=lambda: self.changeUpdateDb(),
+                                                font=('Monospace', 16)
+        ).pack(anchor=ctk.CENTER, pady=60)
+
+        
+
     def changeDefaultTheme(self):
-        with open(self.config_file, "r+") as config_r:
-            data = json.load(config_r)
-            data["Settings"]["dark_theme"] = self.dark_theme
-            config_r.close()
-        with open(self.config_file, "w+") as config_w:
-            json.dump(data, config_w)
-            config_w.close()
+        with open(self.settings_file, "r+") as settings_r:
+            data = json.load(settings_r)
+            data["dark_theme"] = self.dark_theme
+            settings_r.close()
+        with open(self.settings_file, "w+") as settings_w:
+            json.dump(data, settings_w)
+            settings_w.close()
 
     
-    def loadTheme(self):
-        with open(self.config_file, "r+") as config:
-            data = json.load(config)
-            config.close()
-        self.dark_theme = data["Settings"]["dark_theme"]
+    def changeUpdateDb(self):
+        self.update_db = not self.update_db
+
+
+    def loadTheme(self) -> str:
+        with open(self.settings_file, "r+") as settings:
+            data = json.load(settings)
+            settings.close()
+        self.dark_theme = data["dark_theme"]
         if (self.dark_theme):
             return "dark"
         else:
@@ -175,29 +187,35 @@ class LetterStats:
             self.changeDefaultTheme()
 
 
-    def loadConfig(self):
-        if not os.path.exists(self.config_file):
+    def loadSettings(self):
+        if not os.path.exists(self.settings_file):
             jsonwrite = ''' 
             {
-                "App": {
-                    "name": "LettersStats",
-                    "version": "0.0.1",
-                    "author": "N&ko",
-                    "Repo": "https://github.com/snowyiy/LetterStats"
-                },
-                "Settings": {
-                    "dark_theme": true
-                }
+                "dark_theme": true
             }
             '''
             jsonwrite = json.loads(jsonwrite)
 
-            with open(self.config_file, "w+") as config_file:
-                json.dump(jsonwrite, config_file)
-                config_file.close()
+            with open(self.settings_file, "w+") as settings:
+                json.dump(jsonwrite, settings)
+                settings.close()
+
+
+    def loadConfig(self):
+        with open(self.config_file, "r+") as config:
+            data = json.load(config)
+            config.close()
+        self.app_name = data["App"]["name"]
+        self.version = data["App"]["version"]
+        self.author = data["App"]["author"]
+        self.repo_url = data["App"]["repo_url"]
+
 
 
     def main(self) -> None:
+        self.loadSettings()
+        self.loadConfig()
+
         self.root.title("Letter Stats")
         ctk.set_appearance_mode(self.loadTheme())
         self.root.geometry("900x600")

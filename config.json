@@ -1,1 +1,8 @@
-{"App": {"name": "LettersStats", "version": "0.0.1", "author": "N&ko", "Repo": "https://github.com/snowyiy/LetterStats"}, "Settings": {"dark_theme": true}}
+{
+    "App": {
+        "name": "LettersStats",
+        "version": "0.3.1",
+        "author": "N&ko",
+        "repo_url": "https://github.com/snowyiy/LetterStats"
+    }
+}
