@@ -67,12 +67,12 @@ class LetterStats:
 
     def calculFreq(self, text) -> None:
         for letter in text:
-            if (letter in self.dictionnary.keys()):
-                self.dictionnary[letter] += 1.0
+            if (letter.lower() in self.dictionnary.keys()):
+                self.dictionnary[letter.lower()] += 1.0
 
 
         for letter in self.dictionnary:
-            self.dictionnary[letter] /= len(text)
+            self.dictionnary[letter.lower()] /= len(text)
         
         if (self.update_db):
             dialog = ctk.CTkInputDialog(text="Type in the language :", title="Language")

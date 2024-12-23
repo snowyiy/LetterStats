@@ -1,7 +1,7 @@
 {
     "App": {
         "name": "LettersStats",
-        "version": "0.3.1",
+        "version": "0.3.2",
         "author": "N&ko",
         "repo_url": "https://github.com/snowyiy/LetterStats"
     }
