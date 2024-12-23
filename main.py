@@ -19,8 +19,7 @@ class LetterStats:
         self.root = ctk.CTk()
         self.letter_freq = []
         self.dark_theme = True
-        self.default_dark_theme = ctk.StringVar()
-        self.settings_file = "settings.json"
+        self.config_file = "config.json"
         self.database_file = "language.json"
         self.update = True
         self.version = None   # get from config
@@ -138,47 +137,48 @@ class LetterStats:
         ).pack(anchor=ctk.CENTER, pady=10)
 
 
-    def setDefaultTheme(self) -> None:
-        if (self.default_dark_theme == "on"):
-            self.dark_theme = True
-        else:
-            self.dark_theme = False
-
-        #! EDIT CONFIG FILE
-
-
     def showSettings(self) -> None:
         top_settings = ctk.CTkToplevel(self.root)
         top_settings.title("Settings")
         top_settings.resizable(height=False, width=False)
         top_settings.geometry("240x144")
         
-        self.default_dark_theme = ctk.StringVar(value="on")
-        checkbox_color_theme = ctk.CTkCheckBox(top_settings,
-                                               text="Dark Theme by Default",
-                                               command=self.setDefaultTheme,
-                                               variable=self.default_dark_theme,
-                                               onvalue="on",
-                                               offvalue="off"
-        ).pack(anchor=ctk.CENTER, pady=60)
+
+    def changeDefaultTheme(self):
+        with open(self.config_file, "r+") as config_r:
+            data = json.load(config_r)
+            data["Settings"]["dark_theme"] = self.dark_theme
+            config_r.close()
+        with open(self.config_file, "w+") as config_w:
+            json.dump(data, config_w)
+            config_w.close()
+
+    
+    def loadTheme(self):
+        with open(self.config_file, "r+") as config:
+            data = json.load(config)
+            config.close()
+        self.dark_theme = data["Settings"]["dark_theme"]
+        if (self.dark_theme):
+            return "dark"
+        else:
+            return "light"
 
 
     def switchTheme(self) -> None:
         self.dark_theme = not self.dark_theme
         if (self.dark_theme):
             ctk.set_appearance_mode("dark")
+            self.changeDefaultTheme()
         else:
             ctk.set_appearance_mode("light")
+            self.changeDefaultTheme()
 
 
     def loadConfig(self):
-        if os.path.exists(self.settings_file):
-            with open(self.settings_file, "r+") as config_file:
-                self.version = json.load(config_file)["App"]["version"]
-                self.default_dark_theme = json.load(config_file)["Settings"]["dark_theme"]
-                config_file.close()
-        else:
-            jsonwrite =  {
+        if not os.path.exists(self.config_file):
+            jsonwrite = ''' 
+            {
                 "App": {
                     "name": "LettersStats",
                     "version": "0.0.1",
@@ -189,17 +189,17 @@ class LetterStats:
                     "dark_theme": true
                 }
             }
+            '''
+            jsonwrite = json.loads(jsonwrite)
 
-            with open(self.settings_file, "w+") as config_file:
+            with open(self.config_file, "w+") as config_file:
                 json.dump(jsonwrite, config_file)
                 config_file.close()
-
-        # TODO change config file to write default dark theme
 
 
     def main(self) -> None:
         self.root.title("Letter Stats")
-        ctk.set_appearance_mode("dark")
+        ctk.set_appearance_mode(self.loadTheme())
         self.root.geometry("900x600")
         self.root.resizable(width=False, height=False)   # Optional (not to fix my laziness but a feature)
         self.root.grid_columnconfigure(0, weight=1)
