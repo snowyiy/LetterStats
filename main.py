@@ -43,16 +43,21 @@ class LetterStats:
 
 
     def updateJsonDatabase(self, lang):
-        with open(self.database_file, "r+") as data_file:
+        with open(self.database_file, "r+") as data_file_r:
             for letter in self.dictionnary.keys():
-                # Read
-                freq = json.load(data_file)[lang][letter]["freq"]
-                freq_num = json.load(data_file)[lang][letter]["freq_num"]
-                new_freq = (float(self.dictionnary[letter]) + float(freq)) / freq_num + 1 
-                # Write
+                data = json.load(data_file_r)
+                freq = float(data[lang][letter]["freq"])
+                freq_num = float(data[lang][letter]["freq_num"]) + 1.0
+                new_freq = self.dictionnary[letter] + freq / freq_num 
                 
-            config_file.close()
-
+                data[lang][letter]["freq"] = new_freq
+                data[lang][letter]["freq_num"] = freq_num
+            data_file_r.close()
+            
+        with open(self.database_file, "w+") as data_file_w:
+            for letter in self.dictionnary.keys():
+                json.dump(data, data_file_w)
+            data_file_w.close()
 
 
     def drawGraph(self) -> None:
@@ -69,7 +74,6 @@ class LetterStats:
         for letter in text:
             if (letter.lower() in self.dictionnary.keys()):
                 self.dictionnary[letter.lower()] += 1.0
-
 
         for letter in self.dictionnary:
             self.dictionnary[letter.lower()] /= len(text)
