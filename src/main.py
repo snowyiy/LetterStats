@@ -35,6 +35,13 @@ class LetterStats:
                                       font=("Monospace", 16)
         )
 
+        self.btnswitch_update_db = ctk.CTkSwitch(self.root,
+                                                text="Update Lang database",
+                                                command=lambda: self.changeUpdateDb(),
+                                                font=('Monospace', 16)
+        ).pack(anchor=ctk.CENTER, pady=60)
+
+
         # image
         self.img_dark_light_switch_button = ctk.CTkImage(light_image=Image.open("./assets/sun.png"),
                                                          dark_image=Image.open("./assets/moon.png"))
@@ -148,14 +155,6 @@ class LetterStats:
         top_settings.geometry("240x144")
         
 
-        btnswitch_update_db = ctk.CTkSwitch(top_settings,
-                                                text="Update Lang database",
-                                                command=lambda: self.changeUpdateDb(),
-                                                font=('Monospace', 16)
-        ).pack(anchor=ctk.CENTER, pady=60)
-
-        
-
     def changeDefaultTheme(self):
         with open(self.settings_file, "r+") as settings_r:
             data = json.load(settings_r)
@@ -168,6 +167,13 @@ class LetterStats:
     
     def changeUpdateDb(self):
         self.update_db = not self.update_db
+        with open(self.settings_file, "r+") as settings_r:
+            data = json.load(settings_r)
+            settings_r.close()
+        data["update_db"] = self.update_db
+        with open(self.settings_file, "w+") as settings_w:
+            json.dump(data, settings_w)
+            settings_w.close()
 
 
     def loadTheme(self) -> str:
@@ -195,7 +201,8 @@ class LetterStats:
         if not os.path.exists(self.settings_file):
             jsonwrite = ''' 
             {
-                "dark_theme": true
+                "dark_theme": true,
+                "update_db": false
             }
             '''
             jsonwrite = json.loads(jsonwrite)
@@ -203,6 +210,13 @@ class LetterStats:
             with open(self.settings_file, "w+") as settings:
                 json.dump(jsonwrite, settings)
                 settings.close()
+        else:
+            with open(self.settings_file, "r+") as settings:
+                data = json.load(settings)
+                settings.close()
+            self.update_db = data["update_db"]
+            if self.update_db:
+                self.btnswitch_update_db.select()
 
 
     def loadConfig(self):
@@ -272,6 +286,7 @@ class LetterStats:
                                             command=self.drawFromFile,
                                             font=("Monospace", 16)
         ).place(x=460, y=250)
+
 
 
         self.root.mainloop()
